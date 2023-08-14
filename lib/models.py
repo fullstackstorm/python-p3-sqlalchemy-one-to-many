@@ -33,3 +33,10 @@ class Review(Base):
 
     def __repr__(self):
         return f'Review(id={self.id}, score={self.score}, game_id={self.game_id})'
+
+if __name__ == '__main__':
+    engine = create_engine('sqlite:///one_to_many.db')
+    Base.metadata.create_all(engine)  # This line creates the tables
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
