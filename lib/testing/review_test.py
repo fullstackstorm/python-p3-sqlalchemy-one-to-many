@@ -1,40 +1,43 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from conftest import SQLITE_URL
 from models import Game, Review
+from conftest import SQLITE_URL
 
 class TestReview:
     '''Class Review in models.py'''
 
-    # start session, reset db
-    engine = create_engine(SQLITE_URL)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    @classmethod
+    def setup_class(cls):
+        '''Setup database session and test data'''
 
-    # add test data
-    skyrim = Game(
-        title="The Elder Scrolls V: Skyrim",
-        platform="PC",
-        genre="Adventure",
-        price=20
-    )
+        # Start session, reset db
+        cls.engine = create_engine(SQLITE_URL)
+        Session = sessionmaker(bind=cls.engine)
+        cls.session = Session()
 
-    session.add(skyrim)
-    session.commit()
+        # Add test data
+        cls.skyrim = Game(
+            title="The Elder Scrolls V: Skyrim",
+            platform="PC",
+            genre="Adventure",
+            price=20
+        )
 
-    skyrim_review = Review(
-        score=10,
-        comment="Wow, what a game",
-        game_id=skyrim.id
-    )
+        cls.session.add(cls.skyrim)
+        cls.session.commit()
 
-    session.add(skyrim_review)
-    session.commit()
+        cls.skyrim_review = Review(
+            score=10,
+            comment="Wow, what a game",
+            game_id=cls.skyrim.id
+        )
+
+        cls.session.add(cls.skyrim_review)
+        cls.session.commit()
 
     def test_game_has_correct_attributes(self):
-        '''has attributes "id", "score", "comment", "game_id".'''
-        assert(
+        '''Has attributes "id", "score", "comment", "game_id".'''
+        assert (
             all(
                 hasattr(
                     TestReview.skyrim_review, attr
@@ -43,10 +46,12 @@ class TestReview:
                     "score",
                     "comment",
                     "game_id",
-                ]))
+                ]
+            )
+        )
 
     def test_knows_about_associated_game(self):
-        '''has attribute "game" that is the "Game" object associated with its game_id.'''
-        assert(
+        '''Has attribute "game" that is the "Game" object associated with its game_id.'''
+        assert (
             TestReview.skyrim_review.game == TestReview.skyrim
         )
